@@ -1,0 +1,32 @@
+#	//  0: sam-UbunPC   
+#	//  1: Date  		//  2: Time  		//  3: [CPU]User%  
+#	//  4: [CPU]Nice%  	//  5: [CPU]Sys%  	//  6: [CPU]Wait%  
+#	//  7: [CPU]Irq%  	//  8: [CPU]Soft%  	//  9: [CPU]Steal%  
+#	// 10: [CPU]Idle%  	// 11: [CPU]Totl%  	// 12: [CPU]Intrpt/sec  
+#	// 13: [CPU]Ctx/sec  	// 14: [CPU]Proc/sec  	// 15: [CPU]ProcQue  
+#	// 16: [CPU]ProcRun  	// 17: [CPU]L-Avg1  	// 18: [CPU]L-Avg5  
+#	// 19: [CPU]L-Avg15  	// 20: [CPU]RunTot  	// 21: [CPU]BlkTot  
+#	// 22: [MEM]Tot  	// 23: [MEM]Used  	// 24: [MEM]Free  
+#	// 25: [MEM]Shared  	// 26: [MEM]Buf  	// 27: [MEM]Cached  
+#	// 28: [MEM]Slab  	// 29: [MEM]Map  	// 30: [MEM]Anon  
+#	// 31: [MEM]Commit  	// 32: [MEM]Locked  	// 33: [MEM]SwapTot  
+#	// 34: [MEM]SwapUsed  	// 35: [MEM]SwapFree  	// 36: [MEM]SwapIn  
+#	// 37: [MEM]SwapOut  	// 38: [MEM]Dirty  	// 39: [MEM]Clean  
+#	// 40: [MEM]Laundry  	// 41: [MEM]Inactive  	// 42: [MEM]PageIn  
+#	// 43: [MEM]PageOut  	// 44: [MEM]PageFaults  // 45: [MEM]PageMajFaults  
+#	// 46: [MEM]HugeTotal  	// 47: [MEM]HugeFree  	// 48: [MEM]HugeRsvd  
+#	// 49: [MEM]SUnreclaim  
+$0[vistable=0]
+$1[vistable=0]
+$2[vistable=0]
+$3[vistable=0]
+$4[maxvalue=100]
+$5[maxvalue=100]
+$6[maxvalue=100]
+$7[maxvalue=100]
+$8[maxvalue=100]
+$9[maxvalue=100]
+$10[maxvalue=100]
+$11[maxvalue=100]
+$22[maxvalue=4000000]
+
