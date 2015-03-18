@@ -1,14 +1,14 @@
-collectl info receiver API (GUI-Version)
+collectl info receiver GUI-Version
 
 1.Install collectl
 sudo apt-get install collectl
 
-2.Make collectl info receiver API (GUI-Version)
+2.Make collectl info receiver GUI-Version
 cd <collectl info receiver(GUI-Version) folder>
 make clean
 make
 
-3.Start collectl info receiver API (GUI-Version) server
+3.Start collectl info receiver GUI-Version
 ./main_release
 
 4.run collectl in the system you want to monitor, for example:
