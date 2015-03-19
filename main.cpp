@@ -66,6 +66,7 @@ void* run(void* param)
 	//custom
 	int id = *((int*)param);	
 	portno = controller::startPort + id;
+	printf("init socket with id:%d at port:%d\n",id,portno);
 
 	socklen_t clilen;
 	char buffer[256];
@@ -92,7 +93,7 @@ void* run(void* param)
 	ctl.ipAddr[id] = string(inet_ntoa(cli_addr.sin_addr))+":";
 
 	bool isReg = false;
-	cout << "connected " << ctl.ipAddr[id] << endl;
+	cout << "port:" << portno << " is connect with " << ctl.ipAddr[id] << endl;
 	ctl.connect_state[id] = STE_CONNECT;
 	while( 1 )
 	{
@@ -193,19 +194,20 @@ int main(int argc, char** argv)
 	const int xT = 10 + xN*(xB+w);
 	const int yT = 10 + yN*(yB+h);
 
-	pthread_t datareceiver[4];
+	pthread_t datareceiver[controller::nodeNum+1];
+	int param[controller::nodeNum];
 	pthread_mutex_init(&mutex, NULL);
 
 	for( int x = 0 ; x < xN ; ++x )
 		for( int y = 0 ; y < yN ; ++y )
 			ctl.initDg( 40 + x*(xB+w) , 40 + y*(yB+h) ,w,h,x,y); 
 
-	int a1=0 , a2=1 , a3=2 , a4=3;
-	pthread_create(&datareceiver[0], NULL, run, (void *)&a1);
-	pthread_create(&datareceiver[1], NULL, key, (void *)&a2);
-	//pthread_create(&datareceiver[1], NULL, run, (void *)&a2);
-	//pthread_create(&datareceiver[2], NULL, run, (void *)&a3);
-	//pthread_create(&datareceiver[3], NULL, run, (void *)&a4);
+	pthread_create(&datareceiver[0], NULL, key, NULL);
+	for( int i = 0 ; i < controller::nodeNum ; ++i )
+	{
+		param[i] = i;
+		pthread_create(&datareceiver[i+1], NULL, run, (void *)&param[i]);
+	}
 
 	/*  init opengl (glu,glut...)  */
 	glutInit(&argc, argv);
