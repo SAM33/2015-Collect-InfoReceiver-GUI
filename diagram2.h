@@ -12,6 +12,7 @@
 #include <vector>
 #include <string.h>
 #include <iostream>
+#include <algorithm>
 using namespace std;
 /* 繪圖相關集成 */
 #define TEXT_SMALL  0
@@ -43,6 +44,7 @@ public:
 	float getmaxvalue();
 	void settitle(string *_title);                 //設定標題
 	void draw(deque<float>*,int);  //繪圖區,請使用OpenGL主迴圈來調用
+	int cnt_ste;
 	int getx();
 	int gety();
     int getheight();

@@ -108,6 +108,8 @@ void diagram2 :: draw(deque<float> *dequeptr , int _maxitem)
 
 	if(size<=maxitem && size>=2) //一般情況
 	{
+
+		maxvalue = *std::max_element( dequeptr->begin() , dequeptr->end() );
 		float X1,X2,Y1,Y2;
 		float Value1,Value2;
 		for(int index=0 ; index<size-1 ; index++)

@@ -7,10 +7,15 @@
 #include "infoReceiver.h"
 #include "diagram2.h"
 
+#define STE_NOT_START 0
+#define STE_LISTEN 1
+#define STE_CONNECT 2
+#define STE_DISCONNECT 3
+
 class controller {
 	public:
-		static const int maxDgX = 2;
-		static const int maxDgY = 2;
+		static const int maxDgX = 4;
+		static const int maxDgY = 4;
 		static const int nodeNum = 4;
 		static const int startPort = 4000;
 		static const int maxItem = 100;
@@ -23,6 +28,7 @@ class controller {
 		
 		infoReceiver rcv[nodeNum];
 		string ipAddr[nodeNum];
+		int connect_state[nodeNum];
 	
 		map<int,deque<float>> data[nodeNum];
 		controller();

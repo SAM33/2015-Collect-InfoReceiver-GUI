@@ -4,11 +4,17 @@ controller :: controller()
 {
 	for( int i = 0 ; i < DgSize ; ++i )
 	{
-		title[i] = "Not Set";
+		char chs[100] = {};
+		sprintf(chs , "[%d] Not Set" , i );
+		string tmp(chs);
+		title[i] = tmp;
 		usingCol[i] = -1;
 		usingID[i] = -1;
 		usingData[i] = NULL;
 	}
+
+	for( int i = 0 ; i < nodeNum ; ++i )
+		connect_state[i] = STE_NOT_START;
 }
 
 void controller :: initDg(int boundx,int boundy,int width,int height,int x,int y)
@@ -37,7 +43,7 @@ void controller :: setData(int x,int y,int id,int col)
 	usingCol[index] = col;
 	usingID[index] = id;
 	char chs[100] = {};
-	sprintf( chs , "Set to ID:%d\tcol:%d\n" , id , col );
+	sprintf( chs , "[%d] Set to ID:%d\tcol:%d\n" ,index , id , col );
 	string tmp(chs);
 	title[index] = tmp;
 }
@@ -50,10 +56,13 @@ void controller :: trySetTitle()
 			continue;
 
 		auto cols = rcv[usingID[i]].getColumns();
+		char chs[300] = {};
 		if( usingCol[i] < cols.size() )
-			title[i] = ipAddr[usingID[i]] + " " + cols[usingCol[i]];
+			sprintf( chs , "[%d] %s%d %s" ,i , ipAddr[usingID[i]].c_str() , startPort+usingID[i] , cols[usingCol[i]].c_str() );
 		else
-			title[i] = ipAddr[usingID[i]] + " Listening";
+			sprintf( chs , "[%d] %s%d NO DATA" ,i , ipAddr[usingID[i]].c_str() , startPort+i );
+		string tmp(chs);
+		title[i] = tmp; 
 	}
 }
 

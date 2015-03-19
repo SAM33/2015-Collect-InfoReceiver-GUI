@@ -46,7 +46,7 @@ int infoReceiver :: sync()
 			float val;
 			try { val = stof(tempData[col][i]); }
 			catch ( ... ) {		
-				cout << "failed string:" << tempData[col][i] << "at col:" << col << endl; 
+				val = 0.0;
 				return 0;
 			}
 			it.second->push_back(val);

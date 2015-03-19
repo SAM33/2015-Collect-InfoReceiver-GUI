@@ -51,7 +51,10 @@ static void Draw()
 
 	pthread_mutex_lock(&mutex);
 	for( int i = 0 ; i < controller::maxDgX * controller::maxDgY ; ++i )
+	{
+		ctl.dgptr[i]->cnt_ste = ctl.connect_state[ ctl.usingID[i] ];
 		ctl.dgptr[i]->draw(ctl.usingData[i],controller::maxItem);
+	}
 	pthread_mutex_unlock(&mutex);
 	glutSwapBuffers();
 }
@@ -79,6 +82,7 @@ void* run(void* param)
 	if (bind(sockfd, (struct sockaddr *) &serv_addr,
 				sizeof(serv_addr)) < 0)
 		error("ERROR on binding");
+	ctl.connect_state[id] = STE_LISTEN;
 	listen(sockfd,5);
 	newsockfd = accept(sockfd,(struct sockaddr *) &cli_addr, &clilen);
 	if (newsockfd < 0)
@@ -90,11 +94,15 @@ void* run(void* param)
 
 	bool isReg = false;
 	cout << "connected " << ctl.ipAddr[id] << endl;
+	ctl.connect_state[id] = STE_CONNECT;
 	while( 1 )
 	{
 		bzero(buffer,256);
 		n = read(newsockfd,buffer,255);
-		if (n < 0) error("ERROR reading from socket");
+		if (n < 0) {
+			 ctl.connect_state[id] = STE_DISCONNECT;
+			 error("ERROR reading from socket");
+		}
 		string tmp( buffer , buffer+n );
 
 		pthread_mutex_lock(&mutex);
@@ -121,24 +129,80 @@ void* run(void* param)
 	return NULL;
 }
 
+void* key(void* param)
+{
+	int n;
+	int dgID;
+	int rcvID;
+	int col;
+	while(1)
+	{
+		do {
+			puts("choose diagram:");
+		} while( 1 != scanf(" %d",&dgID) );
+		
+		if( dgID >= controller::maxDgX * controller::maxDgY )
+		{
+			puts("error diagram ID");
+			continue;
+		}
+
+		do {
+			puts("choose node:");
+		} while( 1 != scanf(" %d",&rcvID) );
+		
+		if( rcvID >= controller::nodeNum )
+		{
+			puts("error node ID");
+			continue;
+		}
+
+		if( ctl.connect_state[rcvID] != STE_CONNECT )
+		{
+			puts("not connecting");
+			continue;
+		}
+
+		do {
+			ctl.rcv[rcvID].printColumns();
+			puts("choose col:");
+		} while( 1 != scanf(" %d",&col) );
+
+		if( col >= ctl.rcv[rcvID].getColumns().size() )
+		{
+			puts("error column ID");
+			continue;
+		}
+
+		ctl.setData( dgID/controller::maxDgX , dgID%controller::maxDgY , rcvID , col );
+		ctl.trySetTitle();
+	}
+	pthread_exit(NULL);
+	return NULL;
+}
+
 /*  main function  */
 int main(int argc, char** argv)
 {
-	const int width = 400;
+	const int w = 400;
 	const int h = 150;
+	const int xB = 80;
+	const int yB = 80;
+	const int xN = controller::maxDgX;
+	const int yN = controller::maxDgY;
+	const int xT = 10 + xN*(xB+w);
+	const int yT = 10 + yN*(yB+h);
+
 	pthread_t datareceiver[4];
 	pthread_mutex_init(&mutex, NULL);
 
-	ctl.initDg( 50, 50,width,h,0,0); //x=50 y=50 width=400 height=150
-	ctl.initDg( 50,300,width,h,0,1); 
-	ctl.initDg(550, 50,width,h,1,0); 
-	ctl.initDg(550,300,width,h,1,1); 
-	ctl.setData(0,1,0,3);
-	ctl.setData(0,0,0,6);
-	ctl.setData(1,0,0,9);
+	for( int x = 0 ; x < xN ; ++x )
+		for( int y = 0 ; y < yN ; ++y )
+			ctl.initDg( 40 + x*(xB+w) , 40 + y*(yB+h) ,w,h,x,y); //x=50 y=50 width=400 height=150
 
 	int a1=0 , a2=1 , a3=2 , a4=3;
 	pthread_create(&datareceiver[0], NULL, run, (void *)&a1);
+	pthread_create(&datareceiver[1], NULL, key, (void *)&a2);
 	//pthread_create(&datareceiver[1], NULL, run, (void *)&a2);
 	//pthread_create(&datareceiver[2], NULL, run, (void *)&a3);
 	//pthread_create(&datareceiver[3], NULL, run, (void *)&a4);
@@ -146,12 +210,12 @@ int main(int argc, char** argv)
 	/*  init opengl (glu,glut...)  */
 	glutInit(&argc, argv);
 	glutInitWindowPosition(10,10);
-	glutInitWindowSize(1000,500);
+	glutInitWindowSize(xT,yT);
 	glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
 	glutCreateWindow("TSCC2015");
 	glClearColor(0.0,0.0,0.0,0.0);
 	glMatrixMode(GL_PROJECTION);
-	gluOrtho2D(0,1000,0,500);
+	gluOrtho2D(0,xT,0,yT);
 	glutIdleFunc(Repaint);
 	glutDisplayFunc(Draw);
 	glutMainLoop(); //nerver return
