@@ -4,8 +4,11 @@
 #define DgSize maxDgX*maxDgY
 #define conv(x,y) x*maxDgX+y
 
+#include <fstream>
 #include "infoReceiver.h"
 #include "diagram2.h"
+
+using namespace std;
 
 #define STE_NOT_START 0
 #define STE_LISTEN 1
@@ -34,12 +37,14 @@ class controller {
 		controller();
 		void initDg(int,int,int,int,int,int);
 		void setData(int,int,int,int);
+		void printColumns(int);
 
 		// call it to set title
 		void trySetTitle();
 
 		bool autoRegister(int);
 	private:
+		map<string,string> trans;
 };
 
 #endif

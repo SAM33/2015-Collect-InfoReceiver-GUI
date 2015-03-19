@@ -36,53 +36,14 @@ diagram2 :: diagram2(int _x,int _y,int _width,int _height)
 	y = _y;
 	width = _width;
 	height = _height;
-	vistiable = false;
 	maxvalue = 100;
 	maxitem = 10;
 	title = NULL;
 }
 
-void diagram2 :: setvistiable(bool _vistiable)
-{
-	vistiable = _vistiable;
-}
-
 void diagram2 :: settitle(string *_title)
 {
 	title = _title;
-}
-
-void diagram2 :: setmaxvalue(float _maxvalue)
-{
-	if( _maxvalue>=1)
-	{
-		maxvalue = _maxvalue;
-	}
-}
-
-float diagram2 :: getmaxvalue()
-{
-	return maxvalue;
-}
-
-int diagram2 ::getx()
-{
-	return x;
-}
-
-int diagram2 ::gety()
-{
-	return y;
-}
-
-int diagram2 ::getheight()
-{
-	return height;
-}
-
-int diagram2 ::getwidth()
-{
-	return width;
 }
 
 void diagram2 :: draw(deque<float> *dequeptr , int _maxitem)

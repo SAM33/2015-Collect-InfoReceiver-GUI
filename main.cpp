@@ -52,7 +52,6 @@ static void Draw()
 	pthread_mutex_lock(&mutex);
 	for( int i = 0 ; i < controller::maxDgX * controller::maxDgY ; ++i )
 	{
-		ctl.dgptr[i]->cnt_ste = ctl.connect_state[ ctl.usingID[i] ];
 		ctl.dgptr[i]->draw(ctl.usingData[i],controller::maxItem);
 	}
 	pthread_mutex_unlock(&mutex);
@@ -105,7 +104,6 @@ void* run(void* param)
 		}
 		string tmp( buffer , buffer+n );
 
-		pthread_mutex_lock(&mutex);
 		ctl.rcv[id].updateInfo(tmp);
 
 		if( !isReg )
@@ -114,8 +112,10 @@ void* run(void* param)
 			ctl.trySetTitle();
 		}
 
+		pthread_mutex_lock(&mutex);
 		int comingSize = ctl.rcv[id].sync();
 		pthread_mutex_unlock(&mutex);
+
 		if( comingSize == 0 )
 			usleep(200*MS);
 		else
@@ -164,7 +164,7 @@ void* key(void* param)
 		}
 
 		do {
-			ctl.rcv[rcvID].printColumns();
+			ctl.printColumns(rcvID);
 			puts("choose col:");
 		} while( 1 != scanf(" %d",&col) );
 
@@ -198,7 +198,7 @@ int main(int argc, char** argv)
 
 	for( int x = 0 ; x < xN ; ++x )
 		for( int y = 0 ; y < yN ; ++y )
-			ctl.initDg( 40 + x*(xB+w) , 40 + y*(yB+h) ,w,h,x,y); //x=50 y=50 width=400 height=150
+			ctl.initDg( 40 + x*(xB+w) , 40 + y*(yB+h) ,w,h,x,y); 
 
 	int a1=0 , a2=1 , a3=2 , a4=3;
 	pthread_create(&datareceiver[0], NULL, run, (void *)&a1);

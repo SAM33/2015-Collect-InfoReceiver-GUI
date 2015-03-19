@@ -27,7 +27,6 @@ class diagram2
 	string *title;
 	int width;
 	int height;
-	bool vistiable;
 	float maxvalue;   //y軸的最大值
 	float maxitem;
 	/* 繪圖相關集成 */
@@ -39,16 +38,8 @@ class diagram2
 public:
 	int port;  //無相關,但方便pthread傳參數使用,特別加過來
 	diagram2(int _x,int _y,int _width,int _height);  //建構子
-	void setvistiable(bool _vistiable);       //設定是否可見
-	void setmaxvalue(float _maxvalue);          //設定y軸的最大值
-	float getmaxvalue();
 	void settitle(string *_title);                 //設定標題
 	void draw(deque<float>*,int);  //繪圖區,請使用OpenGL主迴圈來調用
-	int cnt_ste;
-	int getx();
-	int gety();
-    int getheight();
-    int getwidth();
 };
 
 #endif

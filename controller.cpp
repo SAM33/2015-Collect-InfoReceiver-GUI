@@ -15,6 +15,12 @@ controller :: controller()
 
 	for( int i = 0 ; i < nodeNum ; ++i )
 		connect_state[i] = STE_NOT_START;
+
+	fstream fin( "trans.txt" , ios::in );
+
+	string k;
+	while(fin>>k)
+		getline(fin,trans[k]);
 }
 
 void controller :: initDg(int boundx,int boundy,int width,int height,int x,int y)
@@ -26,7 +32,6 @@ void controller :: initDg(int boundx,int boundy,int width,int height,int x,int y
 	}
 	
 	dgptr[conv(x,y)] = new diagram2(boundx,boundy,width,height); //x=50 y=50 width=400 height=150
-	dgptr[conv(x,y)]->setvistiable(true);
 	dgptr[conv(x,y)]->settitle( &title[conv(x,y)] );
 		
 }
@@ -46,6 +51,20 @@ void controller :: setData(int x,int y,int id,int col)
 	sprintf( chs , "[%d] Set to ID:%d\tcol:%d\n" ,index , id , col );
 	string tmp(chs);
 	title[index] = tmp;
+}
+
+void controller :: printColumns(int id)
+{
+	auto cols = rcv[id].getColumns();
+	for( size_t i = 0 ; i < cols.size() ; ++i )
+	{
+		auto iter = trans.find(cols[i]);
+		if( iter == trans.end() )
+			cout << i << ":" << cols[i] << endl;
+		else
+			cout << i << ":" << (iter->second) << endl;
+	}
+	cout << endl;
 }
 
 void controller :: trySetTitle()
