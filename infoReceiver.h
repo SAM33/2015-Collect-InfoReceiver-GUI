@@ -15,6 +15,9 @@
 #define ERR 0
 #define NOT_FOUND -1
 
+#define STATE_NOTHING 0
+#define STATE_INITED 1
+
 using namespace std;
 
 class infoReceiver
@@ -22,11 +25,12 @@ class infoReceiver
 public:
 	infoReceiver();
 	int updateInfo(string);
-	void registerItem(deque<string>*,int col,int max);
-	void sync();
+	void registerItem(deque<float>*,int col,int max);
+	int sync();
 
 	vector<string> getColumns();
 	string getcolumnName(int column);
+	bool getState(){ return hasHeader; }
 
 // debug help func
 	void printColumns();
@@ -37,10 +41,10 @@ protected:
 	string host;
 	deque<string> lines;
 	vector<string> columnName;
-	vector< deque<string> > infos;
+//	vector< deque<string> > infos;
 
 	map<int, int> maxSize;
-	map<int, deque<string>* > monitorVec;
+	map<int, deque<float>* > monitorVec;
 	map<int, deque<string> > tempData;
 
 	void updateVector(int);

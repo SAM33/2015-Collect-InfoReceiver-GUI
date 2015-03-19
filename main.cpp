@@ -22,13 +22,14 @@
 #include <pthread.h>
 #include "infoReceiver.h"
 #include "diagram2.h"
-#include "diagram2_plus.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include "controlpanel.h"
+#include "controller.h"
+#define MS 1000
 // collectl -A 127.0.0.1:4000 -scm -P
 
+controller ctl;
 
 void error(const char *msg)
 {
@@ -36,10 +37,6 @@ void error(const char *msg)
 	exit(1);
 }
 
-
-/*  diagrams dataptr  */
-std::vector<diagram2_plus *> diagrams_plus;
-controlpanel panel;
 /* mutex */
 pthread_mutex_t mutex;
 /*  this function will automatic call Draw  */
@@ -50,23 +47,24 @@ static void Repaint()
 /*  opengl critical sectiong  */
 static void Draw()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT);
 
-    pthread_mutex_lock(&mutex);
-    for(int i=0 ; i<diagrams_plus.size() ; i++)
-        diagrams_plus.at(i)->draw();
-    panel.draw();
-    pthread_mutex_unlock(&mutex);
-    glutSwapBuffers();
-
+	pthread_mutex_lock(&mutex);
+	for( int i = 0 ; i < controller::maxDgX * controller::maxDgY ; ++i )
+		ctl.dgptr[i]->draw(ctl.usingData[i],controller::maxItem);
+	pthread_mutex_unlock(&mutex);
+	glutSwapBuffers();
 }
-/*  critical sectiong of comuuter1 input  */
-void* run(void* Diagram)
+
+// thread only connect with client and receiver their data
+void* run(void* param)
 {
-	diagram2_plus *diagram = (diagram2_plus*)Diagram;
 	int sockfd, newsockfd, portno;
-	printf("set port:%d\n",diagram->port);
-	portno = diagram->port;
+
+	//custom
+	int id = *((int*)param);	
+	portno = controller::startPort + id;
+
 	socklen_t clilen;
 	char buffer[256];
 	struct sockaddr_in serv_addr, cli_addr;
@@ -78,29 +76,42 @@ void* run(void* Diagram)
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	serv_addr.sin_port = htons(portno);
 	clilen = sizeof(cli_addr);
-	puts("binding");
 	if (bind(sockfd, (struct sockaddr *) &serv_addr,
 				sizeof(serv_addr)) < 0)
 		error("ERROR on binding");
-	puts("listening");
 	listen(sockfd,5);
 	newsockfd = accept(sockfd,(struct sockaddr *) &cli_addr, &clilen);
 	if (newsockfd < 0)
 		error("ERROR on accept");
-    int n;
-    diagram->setRange(100);
-    diagram->setvistiable(true);
-	diagram->address = string(inet_ntoa(cli_addr.sin_addr))+":";
+	int n;
+
+	// get ip address
+	ctl.ipAddr[id] = string(inet_ntoa(cli_addr.sin_addr))+":";
+
+	bool isReg = false;
+	cout << "connected " << ctl.ipAddr[id] << endl;
 	while( 1 )
 	{
-        pthread_mutex_lock(&mutex);
 		bzero(buffer,256);
 		n = read(newsockfd,buffer,255);
 		if (n < 0) error("ERROR reading from socket");
 		string tmp( buffer , buffer+n );
-        diagram->update(tmp);
+
+		pthread_mutex_lock(&mutex);
+		ctl.rcv[id].updateInfo(tmp);
+
+		if( !isReg )
+		{
+			isReg = ctl.autoRegister(id);
+			ctl.trySetTitle();
+		}
+
+		int comingSize = ctl.rcv[id].sync();
 		pthread_mutex_unlock(&mutex);
-		usleep(50000);
+		if( comingSize == 0 )
+			usleep(200*MS);
+		else
+			usleep(900*MS);
 	}
 
 	close(newsockfd);
@@ -110,124 +121,41 @@ void* run(void* Diagram)
 	return NULL;
 }
 
-void keyPressed (unsigned char key, int x, int y)
-{
-    int s;
-    float f;
-    diagram2_plus *diagrams_plus_ptr = panel.SELECT_Diagram;
-    if(diagrams_plus_ptr==NULL)
-    {
-        return;
-    }
-    if(key==panel.HOTKEY_NextDiagram)
-    {
-        int index = panel.getindex();
-        cout<<"set index "<<index<<" to "<<(index+1)<<endl;
-        index++;
-        if(index<diagrams_plus.size())
-        {
-            cout<<"success to "<<index<<endl;
-            panel.setindex(index);
-            panel.SELECT_Diagram = diagrams_plus.at(index);
-            cout<<"x="<<panel.SELECT_Diagram->getx()<<"y="<<panel.SELECT_Diagram->gety()<<endl;
-        }
-        else
-        {
-            cout<<"unsuccess"<<endl;
-        }
-    }
-    if(key==panel.HOTKEY_LastDiagram)
-    {
-        int index = panel.getindex();
-        cout<<"set index "<<index<<" to "<<(index-1)<<endl;
-        index--;
-        if(index>=0)
-        {
-            cout<<"success to "<<index<<endl;
-            panel.setindex(index);
-            panel.SELECT_Diagram = diagrams_plus.at(index);
-            cout<<"x="<<panel.SELECT_Diagram->getx()<<"y="<<panel.SELECT_Diagram->gety()<<endl;
-        }
-        else
-        {
-            cout<<"unsuccess"<<endl;
-        }
-    }
-    if(key==panel.HOTKEY_NextColume)
-    {
-        s = diagrams_plus_ptr ->getselectcolumn();
-        cout<<"set chosen "<<s<<" to "<<(s+1)<<endl;
-        if( diagrams_plus_ptr ->selectcolumn(s+1) )
-            cout<<"success"<<endl;
-        else
-            cout<<"unsuccess"<<endl;
-    }
-    if(key==panel.HOTKEY_LastColume)
-    {
-        s = diagrams_plus_ptr ->getselectcolumn();
-        cout<<"set chosen "<<s<<" to "<<(s-1)<<endl;
-        if( diagrams_plus_ptr ->selectcolumn(s-1) )
-            cout<<"success"<<endl;
-        else
-            cout<<"unsuccess"<<endl;
-    }
-    if(key==panel.HOTKEY_IncreaseMaxvalue)
-    {
-        f = diagrams_plus_ptr ->getmaxvalue();
-        cout<<"set maxvalue "<<f<<" to "<<(f*10)<<endl;
-        diagrams_plus_ptr ->setmaxvalue(f*10);
-    }
-    if(key==panel.HOTKEY_DecreaseMaxvalue)
-    {
-        f = diagrams_plus_ptr ->getmaxvalue();
-        cout<<"set maxvalue "<<f<<" to "<<(f/10)<<endl;
-        diagrams_plus_ptr ->setmaxvalue(f/10);
-    }
-}
-
 /*  main function  */
 int main(int argc, char** argv)
 {
-    	pthread_t datareceiver[4];
-    	pthread_mutex_init(&mutex, NULL);
-    	int r;
-    	/*  create diagram  */
-        diagram2_plus *diagramptr1 = new diagram2_plus(50,50,400,150); //x=50 y=50 width=400 height=150
-        diagramptr1->port=4000;
-        r = pthread_create(&datareceiver[0], NULL, run, (void *)diagramptr1);
-        diagrams_plus.push_back(diagramptr1);
-    	/*  create diagram  */
-        diagram2_plus *diagramptr2 = new diagram2_plus(50,300,400,150); //x=50 y=50 width=400 height=150
-        diagramptr2->port=4001;
-        r = pthread_create(&datareceiver[1], NULL, run, (void *)diagramptr2);
-        diagrams_plus.push_back(diagramptr2);
-    	/*  create diagram  */
-        diagram2_plus *diagramptr3 = new diagram2_plus(550,50,400,150); //x=50 y=50 width=400 height=150
-        diagramptr3->port=4002;
-        r = pthread_create(&datareceiver[2], NULL, run, (void *)diagramptr3);
-        diagrams_plus.push_back(diagramptr3);
-    	/*  create diagram  */
-        diagram2_plus *diagramptr4 = new diagram2_plus(550,300,400,150); //x=50 y=50 width=400 height=150
-        diagramptr4->port=4003;
-        r = pthread_create(&datareceiver[3], NULL, run, (void *)diagramptr4);
-        diagrams_plus.push_back(diagramptr4);
-        //default selected
-        panel.setindex(0);
-        panel.SELECT_Diagram = diagrams_plus.at(0);
-    	/*  init opengl (glu,glut...)  */
-    	glutInit(&argc, argv);
-    	glutInitWindowPosition(10,10);
-    	glutInitWindowSize(1000,500);
-    	glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
-    	glutCreateWindow("TSCC2015");
-    	glClearColor(0.0,0.0,0.0,0.0);
-    	glMatrixMode(GL_PROJECTION);
-    	gluOrtho2D(0,1000,0,500);
-        glutIdleFunc(Repaint);
-    	glutDisplayFunc(Draw);
-    	glutKeyboardFunc(keyPressed);
-    	glutMainLoop(); //nerver return
-    	pthread_mutex_destroy(&mutex);
+	const int width = 400;
+	const int h = 150;
+	pthread_t datareceiver[4];
+	pthread_mutex_init(&mutex, NULL);
+
+	ctl.initDg( 50, 50,width,h,0,0); //x=50 y=50 width=400 height=150
+	ctl.initDg( 50,300,width,h,0,1); 
+	ctl.initDg(550, 50,width,h,1,0); 
+	ctl.initDg(550,300,width,h,1,1); 
+	ctl.setData(0,1,0,3);
+	ctl.setData(0,0,0,6);
+	ctl.setData(1,0,0,9);
+
+	int a1=0 , a2=1 , a3=2 , a4=3;
+	pthread_create(&datareceiver[0], NULL, run, (void *)&a1);
+	//pthread_create(&datareceiver[1], NULL, run, (void *)&a2);
+	//pthread_create(&datareceiver[2], NULL, run, (void *)&a3);
+	//pthread_create(&datareceiver[3], NULL, run, (void *)&a4);
+
+	/*  init opengl (glu,glut...)  */
+	glutInit(&argc, argv);
+	glutInitWindowPosition(10,10);
+	glutInitWindowSize(1000,500);
+	glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
+	glutCreateWindow("TSCC2015");
+	glClearColor(0.0,0.0,0.0,0.0);
+	glMatrixMode(GL_PROJECTION);
+	gluOrtho2D(0,1000,0,500);
+	glutIdleFunc(Repaint);
+	glutDisplayFunc(Draw);
+	glutMainLoop(); //nerver return
+	pthread_mutex_destroy(&mutex);
 	return 0;
 }
 

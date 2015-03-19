@@ -27,22 +27,37 @@ int infoReceiver::updateInfo( string str )
 	return 1;
 }
 
-void infoReceiver :: registerItem( deque<string> *que ,int col ,int max )
+void infoReceiver :: registerItem( deque<float> *que ,int col ,int max )
 {
 	maxSize[col] = max;
 	monitorVec[col] = que;
 }
 
-void infoReceiver :: sync()
+int infoReceiver :: sync()
 {
+	int res=0;
 	for( auto it : monitorVec )
 	{
 		int col = it.first;
-		it.second->insert( it.second->begin()+it.second->size() , tempData[col].begin() , tempData[col].end() );
+		res += tempData[col].size();
+		//it.second->insert( it.second->begin()+it.second->size() , tempData[col].begin() , tempData[col].end() );
+		for( size_t i = 0 ; i < tempData[col].size() ; ++i )
+		{
+			float val;
+			try { val = stof(tempData[col][i]); }
+			catch ( ... ) {		
+				cout << "failed string:" << tempData[col][i] << "at col:" << col << endl; 
+				return 0;
+			}
+			it.second->push_back(val);
+		}
+
 		tempData[col].clear();
 		while( it.second->size() > maxSize[col] )
 			it.second->pop_front();
 	}
+	
+	return res;
 }
 
 vector<string> infoReceiver::getColumns()

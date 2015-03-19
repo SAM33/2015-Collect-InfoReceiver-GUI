@@ -20,19 +20,19 @@ using namespace std;
 
 class diagram2
 {
- protected:
+ private:
 	int x;
 	int y;
-	string title;
+	string *title;
 	int width;
 	int height;
 	bool vistiable;
 	float maxvalue;   //y軸的最大值
-	float maxitem;    //x軸的最大值
-	deque<string>* dequeptr;
+	float maxitem;
 	/* 繪圖相關集成 */
 	void drawline(float X1, float Y1, float X2, float Y2);
-	void drawtext(float X, float y, string text, int size);
+	void drawtext(float X, float y,string, int size);
+	int drawGrid();
 
 
 public:
@@ -41,9 +41,8 @@ public:
 	void setvistiable(bool _vistiable);       //設定是否可見
 	void setmaxvalue(float _maxvalue);          //設定y軸的最大值
 	float getmaxvalue();
-	void settitle(string _title);                 //設定標題
-	void registerItem(deque<string>*,int _maxitem);  //將deque註冊到diagram2中,讓diagram2畫出deque的資料狀態,max為diagram2再x軸上有幾個點
-	void draw();  //繪圖區,請使用OpenGL主迴圈來調用
+	void settitle(string *_title);                 //設定標題
+	void draw(deque<float>*,int);  //繪圖區,請使用OpenGL主迴圈來調用
 	int getx();
 	int gety();
     int getheight();
