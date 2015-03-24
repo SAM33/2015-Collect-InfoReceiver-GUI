@@ -1,5 +1,22 @@
 #include "diagram2.h"
 //#define ENABLE_DEBUG
+#ifdef __APPLE__
+#include <string.h>
+#include <stdio.h>
+inline void glutBitmapString(void *font , const unsigned char *chars)
+{
+    int l = strlen((char*)chars);
+    for(int i=0 ; i<l ; i++)
+    {
+        glutBitmapCharacter(font,chars[i]);
+    }
+    
+    
+}
+#endif
+
+
+
 void diagram2 :: drawtext(float x, float y,string text, int size)
 {
 	glRasterPos2f(x, y);

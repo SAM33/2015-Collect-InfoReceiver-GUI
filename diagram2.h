@@ -2,9 +2,15 @@
 #ifndef DIAGRAM2_H
 #define DIAGRAM2_H
 
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
 #include <GL/freeglut.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+#endif
 #include <deque>
 #include <string>
 #include <stdio.h>

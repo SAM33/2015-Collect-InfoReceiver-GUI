@@ -1,16 +1,11 @@
 //NTCU TSCC TEAM , 2015.03
 #include <iostream>
-#include <GL/freeglut.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <vector>
 #include <cstdio>
-#include <iostream>
 #include <sstream>
-#include <vector>
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,7 +14,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <pthread.h>
 #include "infoReceiver.h"
 #include "diagram2.h"
 #include <sys/socket.h>
@@ -38,7 +32,7 @@ void error(const char *msg)
 }
 
 /* mutex */
-pthread_mutex_t mutex;
+pthread_mutex_t guimutex;
 /*  this function will automatic call Draw  */
 static void Repaint()
 {
@@ -49,12 +43,12 @@ static void Draw()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&guimutex);
 	for( int i = 0 ; i < controller::maxDgX * controller::maxDgY ; ++i )
 	{
 		ctl.dgptr[i]->draw(ctl.usingData[i],controller::maxItem);
 	}
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&guimutex);
 	glutSwapBuffers();
 }
 
@@ -79,9 +73,22 @@ void* run(void* param)
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	serv_addr.sin_port = htons(portno);
 	clilen = sizeof(cli_addr);
-	if (bind(sockfd, (struct sockaddr *) &serv_addr,
-				sizeof(serv_addr)) < 0)
-		error("ERROR on binding");
+    
+#ifdef __APPLE__
+    //mac os will auto import some function in c++11 when we use std=c++11 param
+    //we use :: operator to tell c++11 , don't use its 'std::bin' to
+    //replace our c language 'bind' function
+    int r  = ::bind(sockfd, (struct sockaddr *)&serv_addr,sizeof(serv_addr));
+    if (r < 0)
+        
+        error("ERROR on binding");
+    
+#else
+    if (bind(sockfd, (struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
+        error("ERROR on binding");
+    
+#endif
+    //bind(sockfd,&serv_addr,sizeof(serv_addr));
 	ctl.connect_state[id] = STE_LISTEN;
 	listen(sockfd,5);
 	newsockfd = accept(sockfd,(struct sockaddr *) &cli_addr, &clilen);
@@ -113,9 +120,9 @@ void* run(void* param)
 			ctl.trySetTitle();
 		}
 
-		pthread_mutex_lock(&mutex);
+		pthread_mutex_lock(&guimutex);
 		int comingSize = ctl.rcv[id].sync();
-		pthread_mutex_unlock(&mutex);
+		pthread_mutex_unlock(&guimutex);
 
 		if( comingSize == 0 )
 			usleep(200*MS);
@@ -196,7 +203,7 @@ int main(int argc, char** argv)
 
 	pthread_t datareceiver[controller::nodeNum+1];
 	int param[controller::nodeNum];
-	pthread_mutex_init(&mutex, NULL);
+	pthread_mutex_init(&guimutex, NULL);
 
 	for( int x = 0 ; x < xN ; ++x )
 		for( int y = 0 ; y < yN ; ++y )
@@ -221,7 +228,7 @@ int main(int argc, char** argv)
 	glutIdleFunc(Repaint);
 	glutDisplayFunc(Draw);
 	glutMainLoop(); //nerver return
-	pthread_mutex_destroy(&mutex);
+	pthread_mutex_destroy(&guimutex);
 	return 0;
 }
 
