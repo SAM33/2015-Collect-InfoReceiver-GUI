@@ -53,6 +53,14 @@ void controller :: setData(int x,int y,int id,int col)
 	title[index] = tmp;
 }
 
+#ifdef ENABLE_OPTION
+void controller :: setOption(int x,int y,int optioncode,void * value)
+{
+	int index = conv(x,y);
+	dgptr[conv(x,y)]->option(optioncode,value);
+}
+#endif
+
 void controller :: printColumns(int id)
 {
 	auto cols = rcv[id].getColumns();

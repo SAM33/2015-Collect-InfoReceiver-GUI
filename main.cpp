@@ -146,7 +146,7 @@ void* key(void* param)
 	while(1)
 	{
 		do {
-			puts("choose diagram:");
+			puts("<STEP1>choose diagram:");
 		} while( 1 != scanf(" %d",&dgID) );
 		
 		if( dgID >= controller::maxDgX * controller::maxDgY )
@@ -156,7 +156,7 @@ void* key(void* param)
 		}
 
 		do {
-			puts("choose node:");
+			puts("<STEP2>choose node:");
 		} while( 1 != scanf(" %d",&rcvID) );
 		
 		if( rcvID >= controller::nodeNum )
@@ -173,7 +173,7 @@ void* key(void* param)
 
 		do {
 			ctl.printColumns(rcvID);
-			puts("choose col:");
+			puts("<STEP3>choose col:");
 		} while( 1 != scanf(" %d",&col) );
 
 		if( col >= ctl.rcv[rcvID].getColumns().size() )
@@ -184,6 +184,72 @@ void* key(void* param)
 
 		ctl.setData( dgID/controller::maxDgX , dgID%controller::maxDgY , rcvID , col );
 		ctl.trySetTitle();
+		#ifdef ENABLE_OPTION
+		int op;
+		bool input=true;
+		while(input)
+		{
+			printf("0 : no more option\n");
+			printf("1 : Enable_MemoryFromat\n");
+			//collect input is "KB" we want to change it to MB or GB
+			printf("2 : Disable_MemoryFromat\n");
+			puts("<STEP4>set option:");
+			int s = scanf("%d",&op);
+			int u;
+			int arg_int;
+			int one = 1;		
+			int to_KB = 1;
+			int to_MB = 1000;
+			int to_GB = 1000000;
+			char Unit[5];	
+			switch(op)
+			{
+				case 0:
+				input=false;
+				break;
+
+				case 1:
+				printf("0 : KB(default)\n");
+				printf("1 : MB\n");
+				printf("2 : GB\n");
+				printf("Unit:\n");
+				memset(Unit,0x0,5);
+				s = scanf("%d",&u);
+				if(u==0)
+				{
+					ctl.setOption(dgID/controller::maxDgX,dgID%controller::maxDgY,Option_SetGridDiv,(void*)&to_KB);
+					strcpy(Unit,"KB");
+				}
+				else if(u==1)
+				{
+					ctl.setOption(dgID/controller::maxDgX,dgID%controller::maxDgY,Option_SetGridDiv,(void*)&to_MB);
+					strcpy(Unit,"MB");
+				}
+				else if(u==2)
+				{
+					ctl.setOption(dgID/controller::maxDgX,dgID%controller::maxDgY,Option_SetGridDiv,(void*)&to_GB);
+					strcpy(Unit,"GB");
+				}
+				else
+				{
+					;
+				}
+				ctl.setOption(dgID/controller::maxDgX,dgID%controller::maxDgY,Option_SetGridUnit,(void*)Unit);
+				ctl.setOption(dgID/controller::maxDgX,dgID%controller::maxDgY,Option_EnableGridDiv,(void*)&one);
+				ctl.setOption(dgID/controller::maxDgX,dgID%controller::maxDgY,Option_EnableGridUnit,(void*)&one);
+				break;
+
+				case 2:
+				ctl.setOption(dgID/controller::maxDgX,dgID%controller::maxDgY,Option_DisableGridDiv,(void*)&one);
+				ctl.setOption(dgID/controller::maxDgX,dgID%controller::maxDgY,Option_DisableGridUnit,(void*)&one);
+				break;
+
+				default:
+				break;
+
+			}
+		}
+		#endif
 	}
 	pthread_exit(NULL);
 	return NULL;

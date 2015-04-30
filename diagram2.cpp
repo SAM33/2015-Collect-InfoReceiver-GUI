@@ -56,6 +56,9 @@ diagram2 :: diagram2(int _x,int _y,int _width,int _height)
 	maxvalue = 100;
 	maxitem = 10;
 	title = NULL;
+#ifdef ENABLE_OPTION
+	initoption();
+#endif
 }
 
 void diagram2 :: settitle(string *_title)
@@ -67,7 +70,7 @@ void diagram2 :: draw(deque<float> *dequeptr , int _maxitem)
 {
 	maxitem = _maxitem;
 	glColor3f(0,1,0);
-	if( title!=NULL )drawtext(x,y+height+20,*title,TEXT_LARGE);
+	if( title!=NULL )drawtext(x,y+height+20,*title,TEXT_MIDDLE);
 	drawGrid();
 	/* 畫出資料 */
 	if(dequeptr==NULL)
@@ -111,6 +114,8 @@ void diagram2 :: draw(deque<float> *dequeptr , int _maxitem)
 	}
 }
 
+
+
 int diagram2 :: drawGrid()
 {
 	char temp[20];
@@ -152,8 +157,26 @@ int diagram2 :: drawGrid()
 				float Y = y+(float)((float)i/(float)maxvalue)*(float)height;
 				drawline(x+5,Y,x-5,Y);
 				bzero(temp,20);
+				double value = (double)i;
+				#ifdef ENABLE_OPTION
+				if(Enable_GridDiv)
+				{
+					value/=GridDiv;
+					sprintf(temp+strlen(temp),"%.2lf",value);
+				}
+				if(Enable_GridUnit)
+				{
+					sprintf(temp+strlen(temp),"%s",GridUnit);
+				}
+				else
+				{
+					sprintf(temp+strlen(temp),"%d",(int)value);
+				}
+				drawtext(x-20,Y-5,string(temp),TEXT_SMALL);
+				#else
 				sprintf(temp,"%d",i);
 				drawtext(x-20,Y-5,string(temp),TEXT_SMALL);
+				#endif
 			}
 		}
 		else
@@ -168,4 +191,53 @@ int diagram2 :: drawGrid()
 
 	return 0;
 }
+
+
+#ifdef ENABLE_OPTION
+void diagram2 :: option(int optioncode,void * value)
+{
+	switch(optioncode)
+	{
+		case Option_SetGridDiv:
+		GridDiv = *(int*)value;
+		printf("GridDiv set to %d\n",GridDiv);
+		break;
+
+		case Option_SetGridUnit:
+		strcpy(GridUnit,(char*)value);
+		printf("GridUnit set to %s\n",GridUnit);
+		break;
+
+		case Option_EnableGridDiv:
+		Enable_GridDiv = true;
+		printf("Enable GridDiv\n");
+		break;
+
+		case Option_DisableGridDiv:
+		Enable_GridDiv = false;
+		printf("Disable GridDiv\n");
+		break;
+
+		case Option_EnableGridUnit:
+		Enable_GridUnit = true;
+		printf("Enable GridUnit\n");
+		break;
+
+		case Option_DisableGridUnit:
+		Enable_GridUnit = false;
+		printf("Disable GridUnit\n");
+		break;
+	}	
+}
+
+
+void diagram2 :: initoption()
+{
+	GridDiv = 0;
+	memset(GridUnit,0x0,5);
+	Enable_GridDiv = false;
+	Enable_GridUnit = false;
+}
+
+#endif
 

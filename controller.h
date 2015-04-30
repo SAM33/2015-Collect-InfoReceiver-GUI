@@ -37,6 +37,11 @@ class controller {
 		controller();
 		void initDg(int,int,int,int,int,int);
 		void setData(int,int,int,int);
+
+		#ifdef ENABLE_OPTION
+		void setOption(int,int,int,void *);
+		#endif
+
 		void printColumns(int);
 
 		// call it to set title
