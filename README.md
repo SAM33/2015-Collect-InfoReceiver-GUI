@@ -12,23 +12,18 @@ make
 ./main_release
 
 4.run collectl in the system you want to monitor, for example:
-collectl -A <ip you just got>:4000 -scm -P
+collectl -A <ip you just got>:4000 -scmn -P
 don't forget -P option because we use plot format to commuicate.
 
 5.this program can support 4 computers, for example:
 computer1:
-collectl -A <ip you just got>:4000 -scm -P
+collectl -A <ip you just got>:4000 -scmn -P
 computer2:
-collectl -A <ip you just got>:4001 -scm -P
+collectl -A <ip you just got>:4001 -scmn -P
 computer3:
-collectl -A <ip you just got>:4002 -scm -P
+collectl -A <ip you just got>:4002 -scmn -P
 computer4:
-collectl -A <ip you just got>:4003 -scm -P
+collectl -A <ip you just got>:4003 -scmn -P
 
-6.you can use keyboard to control this program
-'w' : select next diagram
-'s' : select last diagram
-'d' : display data of next column in selected diagram 
-'a' : display data of last column in selected diagram
-'q' : decrease y-axis maxvalue by 10 times in selected diagram 
-'e' : increase y-axis maxvalue by 10 times in selected diagram 
+6.look at terminal to control this program
+
