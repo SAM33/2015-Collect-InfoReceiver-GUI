@@ -3,7 +3,7 @@ collectl info receiver GUI-Version
 1.Install collectl
 <br/>
 sudo apt-get install collectl
-<br/>
+<br/><br/>
 2.Make collectl info receiver GUI-Version
 <br/>
 cd <collectl info receiver(GUI-Version) folder>
@@ -11,17 +11,17 @@ cd <collectl info receiver(GUI-Version) folder>
 make clean
 <br/>
 make
-<br/>
+<br/><br/>
 3.Start collectl info receiver GUI-Version
 <br/>
 ./main_release
-<br/>
+<br/><br/>
 4.run collectl in the system you want to monitor, for example:
 <br/>
 collectl -A [ip you just got]:4000 -scmn -P
 <br/>
 don't forget -P option because we use plot format to commuicate.
-<br/>
+<br/><br/>
 5.this program can support 4 computers, for example:
 <br/>
 computer1:
@@ -39,6 +39,7 @@ collectl -A [ip you just got]:4002 -scmn -P
 computer4:
 <br/>
 collectl -A [ip you just got]:4003 -scmn -P
-<br/>
+<br/><br/>
 6.look at terminal to control this program
-<br/>
+<br/><br/>
+Linux : This program base on freeglut3-dev
