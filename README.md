@@ -1,10 +1,12 @@
-collectl info receiver GUI-Version
-<br/>
-1.Install collectl
-<br/>
-sudo apt-get install collectl
-<br/><br/>
-2.Make collectl info receiver GUI-Version
+collectl info receiver GUI-Version<br/>
+For windows users : https://github.com/SAM33/infoReceiver-guiversion <br/>
+Base on library:
+Linux : freeglut3-dev
+Mac   : xcode
+
+1.Install collectl in the system you want to keep watch on <br/>
+sudo apt-get install collectl  <br/>
+2.Make collectl info receiver GUI-Version in The monitor's computer 
 <br/>
 cd <collectl info receiver(GUI-Version) folder>
 <br/>
@@ -16,7 +18,8 @@ make
 <br/>
 ./main_release
 <br/><br/>
-4.run collectl in the system you want to monitor, for example:
+4.run collectl in the system you want to keep watch on <br/>, 
+for example:
 <br/>
 collectl -A [ip you just got]:4000 -scmn -P
 <br/>
@@ -42,4 +45,4 @@ collectl -A [ip you just got]:4003 -scmn -P
 <br/><br/>
 6.look at terminal to control this program
 <br/><br/>
-Linux : This program base on freeglut3-dev
+
