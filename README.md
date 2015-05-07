@@ -1,8 +1,8 @@
 collectl info receiver GUI-Version<br/>
 For windows users : https://github.com/SAM33/infoReceiver-guiversion <br/>
-Base on library:
-Linux : freeglut3-dev
-Mac   : xcode
+Base on library: <br/>
+Linux : freeglut3-dev<br/>
+Mac   : xcode<br/>
 
 1.Install collectl in the system you want to keep watch on <br/>
 sudo apt-get install collectl  <br/>
