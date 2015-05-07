@@ -1,5 +1,5 @@
 collectl info receiver GUI-Version<br/>
-For windows users : https://github.com/SAM33/infoReceiver-guiversion <br/>
+For windows users : https://github.com/SAM33/infoReceiver-guiversion-windows <br/>
 Base on library: <br/>
 Linux : freeglut3-dev<br/>
 Mac   : xcode<br/>
